@@ -1,0 +1,12 @@
+Descrição,Valor,Categoria,Data,Tipo
+Teste,112.0,a,2025-05-25,Receita
+Teste,112.0,a,2025-05-26,Receita
+Teste,112.0,a,2025-05-27,Receita
+Teste,112.0,a,2025-05-28,Receita
+Teste,112.0,a,2025-05-29,Receita
+Teste,112.0,a,2025-05-30,Receita
+Teste,112.0,a,2025-05-31,Receita
+teste,121.0,Teste 12,2025-05-31,Despesa
+teste,11.0,111,2025-05-25,Despesa
+teste,121.0,aaa,2025-05-26,Despesa
+teste,11.0,aa,2025-05-27,Receita

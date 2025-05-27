@@ -1,155 +1,171 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from datetime import datetime
+from datetime import datetime, timedelta
 
-# === Auxiliares ===
+def load_data():
+    try:
+        df = pd.read_csv("transacoes.csv")
+        return df
+    except FileNotFoundError:
+        return pd.DataFrame(columns=["Descrição", "Valor", "Categoria", "Data", "Tipo"])
 
-def gerar_grafico(df):
-    if df.empty:
-        return None
-    df["data"] = pd.to_datetime(df["data"], errors="coerce")
-    grp = (
-        df.groupby(["data", "tipo"])["valor"]
-        .sum()
-        .unstack(fill_value=0)
-        .reset_index()
-    )
-    if "Receita" not in grp.columns: grp["Receita"] = 0
-    if "Despesa" not in grp.columns: grp["Despesa"] = 0
-    grp = grp.sort_values("data")
-    fig = px.line(
-        grp,
-        x="data",
-        y=["Receita", "Despesa"],
-        markers=True,
-        labels={"value": "Valor (R$)", "data": "Data", "variable": "Tipo"},
-        title="Evolução de Receitas e Despesas"
-    )
-    fig.update_layout(legend_title_text="Tipo", margin=dict(t=50, b=20))
-    return fig
+def save_data(df):
+    df.to_csv("transacoes.csv", index=False)
 
-def formatar_valor(v):
-    s = f"R$ {v:,.2f}"
-    return s.replace(",", "X").replace(".", ",").replace("X", ".")
+def format_data(df):
+    df["Data"] = pd.to_datetime(df["Data"], errors="coerce")
+    df.dropna(subset=["Data"], inplace=True)
+    return df
 
-# === Callbacks ===
+def grafico_semanal(df):
+    hoje = datetime.now().date()
+    inicio_semana = hoje - timedelta(days=hoje.weekday())
+    dias_semana = [inicio_semana + timedelta(days=i) for i in range(7)]
+    df_base = pd.DataFrame({"Data": pd.to_datetime(dias_semana)})
 
-def remover(idx):
-    st.session_state.dados.pop(idx)
+    df_semana = df[(df["Data"].dt.date >= inicio_semana) & (df["Data"].dt.date <= inicio_semana + timedelta(days=6))]
+    df_agrupado = df_semana.groupby(["Data", "Tipo"])["Valor"].sum().unstack(fill_value=0).reset_index()
 
-def editar(idx):
-    st.session_state.editing = idx
+    df_final = pd.merge(df_base, df_agrupado, on="Data", how="left").fillna(0)
 
-def salvar(idx, tipo, descricao, valor, data):
-    st.session_state.dados[idx] = {
-        "tipo": tipo,
-        "descricao": descricao.strip(),
-        "valor": valor,
-        "data": data.strftime("%Y-%m-%d")
+    if "Receita" not in df_final.columns:
+        df_final["Receita"] = 0
+    if "Despesa" not in df_final.columns:
+        df_final["Despesa"] = 0
+
+    dias_abrev = {
+        "Monday": "Seg", "Tuesday": "Ter", "Wednesday": "Qua",
+        "Thursday": "Qui", "Friday": "Sex", "Saturday": "Sáb", "Sunday": "Dom"
     }
-    st.session_state.editing = None
+    df_final["DiaSemana"] = df_final["Data"].dt.day_name().map(dias_abrev)
 
-def cancelar():
-    st.session_state.editing = None
+    fig = px.bar(
+        df_final,
+        x="DiaSemana",
+        y=["Despesa", "Receita"],
+        barmode="group",
+        title="Resumo Semanal (Segunda a Domingo)",
+        labels={"value": "Valor (R$)", "DiaSemana": "Dia da Semana"},
+        text_auto='.2s'
+    )
+    fig.update_layout(yaxis_title="Valor em R$", xaxis_title="Dia da Semana")
+    fig.update_traces(textposition='outside')
+    st.plotly_chart(fig, use_container_width=True)
 
-# === Interface ===
-
-def mostrar_historico():
-    df = pd.DataFrame(st.session_state.dados)
+def grafico_mensal(df):
     if df.empty:
-        st.info("Nenhuma transação registrada.")
+        st.warning("Sem dados para o gráfico mensal.")
         return
 
-    filtro = st.text_input("🔎 Filtrar descrição:", key="filtro")
-    if filtro:
-        df = df[df["descricao"].str.contains(filtro, case=False, na=False)]
+    df["AnoMes"] = df["Data"].dt.to_period("M").astype(str)
+    df_agrupado = df.groupby(["AnoMes", "Tipo"])["Valor"].sum().unstack(fill_value=0)
 
-    for i, row in df.iterrows():
-        st.markdown("---")
-        c1, c2, c3, c4 = st.columns([4, 2, 0.5, 0.5])
-        with c1:
-            st.markdown(f"**📅 {row['data']} | {row['tipo']}**")
-            st.markdown(f"🔸 {row['descricao']}")
-        with c2:
-            cor = "green" if row["tipo"] == "Receita" else "red"
-            st.markdown(
-                f"<div style='color:{cor}; font-weight:bold;'>{formatar_valor(row['valor'])}</div>",
-                unsafe_allow_html=True
-            )
-        with c3:
-            st.button("✏️", key=f"edit_{i}", help="Editar", on_click=editar, args=(i,))
-        with c4:
-            st.button("🗑️", key=f"del_{i}", help="Excluir", on_click=remover, args=(i,))
+    if "Receita" not in df_agrupado.columns:
+        df_agrupado["Receita"] = 0
+    if "Despesa" not in df_agrupado.columns:
+        df_agrupado["Despesa"] = 0
 
-def main():
-    st.set_page_config(layout="wide")
-    st.title("💰 FinanceBoard")
+    df_agrupado = df_agrupado.reset_index()
 
-    if "dados" not in st.session_state:
-        st.session_state.dados = []
-    if "editing" not in st.session_state:
-        st.session_state.editing = None
+    fig = px.bar(
+        df_agrupado,
+        x="AnoMes",
+        y=["Despesa", "Receita"],
+        barmode="group",
+        title="Resumo Mensal",
+        labels={"AnoMes": "Mês", "value": "Valor (R$)"},
+        text_auto='.2s'
+    )
+    fig.update_layout(yaxis_title="Valor em R$", xaxis_title="Mês")
+    fig.update_traces(textposition='outside')
+    st.plotly_chart(fig, use_container_width=True)
+
+def formulario_adicionar(df):
+    st.subheader("Adicionar Nova Transação")
+    descricao = st.text_input("Descrição")
+    valor = st.number_input("Valor (R$)", min_value=0.01, format="%.2f")
+    categoria = st.text_input("Categoria")
+    tipo = st.selectbox("Tipo", ["Despesa", "Receita"])
+    data = st.date_input("Data", datetime.now())
+
+    if st.button("Adicionar"):
+        if descricao and valor > 0 and categoria:
+            nova_transacao = {
+                "Descrição": descricao,
+                "Valor": valor,
+                "Categoria": categoria,
+                "Data": pd.to_datetime(data),
+                "Tipo": tipo
+            }
+            df = pd.concat([df, pd.DataFrame([nova_transacao])], ignore_index=True)
+            save_data(df)
+            st.success("Transação adicionada!")
+            st.experimental_rerun()  # <== Aqui força o reload da página
+        else:
+            st.error("Preencha todos os campos corretamente.")
+    return df
+
+def dashboard(df):
+    st.title("FinanceBoard - Dashboard")
+
+    total_receitas = df.loc[df["Tipo"] == "Receita", "Valor"].sum()
+    total_despesas = df.loc[df["Tipo"] == "Despesa", "Valor"].sum()
+    saldo = total_receitas - total_despesas
+
+    st.markdown(
+        f"""
+        <div style='display: flex; justify-content: space-around; padding: 10px 0;'>
+            <div style='text-align: center;'>
+                <h3 style='color: green;'>Receitas</h3>
+                <p style='font-size: 24px;'>R$ {total_receitas:,.2f}</p>
+            </div>
+            <div style='text-align: center;'>
+                <h3 style='color: red;'>Despesas</h3>
+                <p style='font-size: 24px;'>R$ {total_despesas:,.2f}</p>
+            </div>
+            <div style='text-align: center;'>
+                <h3>Saldo</h3>
+                <p style='font-size: 28px; font-weight: bold;'>{saldo:,.2f}</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     col1, col2 = st.columns([1, 1])
 
-    # Coluna esquerda: adicionar + histórico
     with col1:
-        st.subheader("➕ Adicionar Transação")
-        with st.form("add", clear_on_submit=True):
-            tipo = st.selectbox("Tipo", ["Receita", "Despesa"])
-            desc = st.text_input("Descrição")
-            val  = st.number_input("Valor (R$)", min_value=0.01, format="%.2f")
-            dt   = st.date_input("Data", datetime.today())
-            if st.form_submit_button("Adicionar"):
-                if not desc.strip():
-                    st.warning("Descrição é obrigatória.")
-                else:
-                    st.session_state.dados.append({
-                        "tipo": tipo,
-                        "descricao": desc.strip(),
-                        "valor": val,
-                        "data": dt.strftime("%Y-%m-%d")
-                    })
+        df = formulario_adicionar(df)
 
-        st.markdown("---")
-        st.subheader("📋 Histórico de Transações")
-        mostrar_historico()
-
-    # Coluna direita: gráfico + painel de edição
     with col2:
-        st.subheader("📈 Evolução de Receitas e Despesas")
-        df = pd.DataFrame(st.session_state.dados)
-        fig = gerar_grafico(df)
-        if fig:
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Nenhuma transação para exibir no gráfico.")
+        grafico_semanal(df)
 
-        if st.session_state.editing is not None:
-            idx = st.session_state.editing
-            trans = st.session_state.dados[idx]
-            st.subheader("✏️ Editar Transação")
-            with st.form("edit", clear_on_submit=False):
-                tipo_e = st.selectbox(
-                    "Tipo", ["Receita", "Despesa"],
-                    index=0 if trans["tipo"] == "Receita" else 1
-                )
-                desc_e = st.text_input("Descrição", value=trans["descricao"])
-                val_e  = st.number_input(
-                    "Valor (R$)", min_value=0.01,
-                    value=trans["valor"], format="%.2f"
-                )
-                dt_e   = st.date_input(
-                    "Data", datetime.strptime(trans["data"], "%Y-%m-%d")
-                )
-                col_a, col_b = st.columns(2)
-                with col_a:
-                    if st.form_submit_button("💾 Salvar"):
-                        salvar(idx, tipo_e, desc_e, val_e, dt_e)
-                with col_b:
-                    if st.form_submit_button("❌ Cancelar"):
-                        cancelar()
+    st.markdown("---")
+    grafico_mensal(df)
+
+    return df
+
+def historico(df):
+    st.title("Histórico de Transações")
+    st.write("Aqui você pode editar e excluir as transações.")
+    edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True)
+
+    if not edited_df.equals(df):
+        save_data(edited_df)
+        st.success("Dados atualizados! Recarregue a página para refletir as mudanças.")
+
+def main():
+    st.set_page_config(page_title="FinanceBoard", layout="wide")
+    df = load_data()
+    df = format_data(df)
+
+    menu = st.sidebar.radio("Navegação", ["Dashboard", "Histórico"])
+
+    if menu == "Dashboard":
+        df = dashboard(df)
+    else:
+        historico(df)
 
 if __name__ == "__main__":
     main()
