@@ -101,7 +101,15 @@ def formulario_adicionar(df):
             df = pd.concat([df, pd.DataFrame([nova_transacao])], ignore_index=True)
             save_data(df)
             st.success("Transação adicionada!")
-            st.experimental_rerun()  # <== Aqui força o reload da página
+            # Recarrega a página via JavaScript pois st.experimental_rerun() não está disponível
+            st.markdown(
+                """
+                <script>
+                    window.location.reload();
+                </script>
+                """,
+                unsafe_allow_html=True
+            )
         else:
             st.error("Preencha todos os campos corretamente.")
     return df
