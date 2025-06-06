@@ -1,2 +1,16 @@
-# FinanceBoard
- FinanceBoard é um painel financeiro pessoal desenvolvido em Python que permite visualizar, adicionar e acompanhar suas receitas e despesas de forma simples e intuitiva. Utilizando Streamlit, Pandas e Matplotlib, o painel lê planilhas Excel, calcula automaticamente os totais por dia e por mês, e exibe gráficos atualizados para facilitar a análise do seu fluxo financeiro.  🚀 Funcionalidades 📥 Leitura automática de planilhas .xlsx  ➕ Adição manual de receitas e despesas  🧮 Cálculo automático de totais diários e mensais  📈 Gráficos interativos de receitas e despesas  💾 Salvamento contínuo dos dados na planilha  🛠️ Tecnologias utilizadas Python 3.x  Pandas  Streamlit  Matplotlib  openpyxl
+# 💰 FinanceBoard
+
+Projeto de controle financeiro pessoal desenvolvido em Python com Streamlit.
+
+## ✅ Requisitos
+
+- Python 3.10 ou superior
+- Pip
+
+## 🚀 Como rodar o projeto
+
+### 1. Clonar ou baixar o repositório
+
+```bash
+git clone https://github.com/seu-usuario/FinanceBoard.git
+cd FinanceBoard

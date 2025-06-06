@@ -1,0 +1,13 @@
+Descrição,Valor,Categoria,Data,Tipo
+teste,123.0,aa,2025-06-05,Receita
+aaaa,0.01,Teste 12,2025-06-05,Despesa
+aaaa,121.0,Teste 12,2025-06-05,Receita
+aaaa,1213.0,33,2025-06-01,Despesa
+a,0.01,a,2025-06-05,Despesa
+aaaa,123.0,aa,2025-06-05,Despesa
+teste,0.01,aa,2025-06-05,Despesa
+a,0.01,a,2025-06-05,Despesa
+a,0.01,a,2025-06-05,Despesa
+a,13.0,a,2025-06-05,Despesa
+a,0.01,a,2025-06-05,Despesa
+aaaa,133333.0,a,2025-06-05,Receita
