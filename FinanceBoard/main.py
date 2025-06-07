@@ -132,43 +132,6 @@ def formulario_adicionar(df):
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        # Estilo CSS para os botões
-        botao_css = """
-            <style>
-                .botao-estilizado {
-                    background-color: #007bff;
-                    color: white;
-                    border: none;
-                    padding: 10px 22px;
-                    text-align: center;
-                    font-size: 16px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-                    width: 100%;
-                }
-                .botao-estilizado:hover {
-                    background-color: #0056b3;
-                }
-                .botao-secundario {
-                    background-color: #6c757d;
-                    color: white;
-                    border: none;
-                    padding: 10px 22px;
-                    text-align: center;
-                    font-size: 16px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-                    width: 100%;
-                }
-                .botao-secundario:hover {
-                    background-color: #565e64;
-                }
-            </style>
-        """
-        st.markdown(botao_css, unsafe_allow_html=True)
-
         btn_col1, btn_col2, _ = st.columns([1,1,2])
         with btn_col1:
             if st.button("Adicionar"):
@@ -191,9 +154,6 @@ def formulario_adicionar(df):
                     st.success("Transação adicionada!")
                     st.session_state.reset_flag = True
                     st.info("Por favor, recarregue a página para limpar o formulário.")
-                    
-                    # Forçar atualização com script para limpar após adicionar (se quiser descomente)
-                    # st.experimental_rerun()
 
         with btn_col2:
             if st.button("Atualizar"):
@@ -244,7 +204,7 @@ def dashboard(df):
     return df
 
 def historico(df):
-    st.title("Histórico de Transações")
+    st.markdown("<h1 style='text-align: center; font-size: 2.5rem;'>FinanceBoard - Histórico</h1>", unsafe_allow_html=True)
     st.write("Aqui você pode editar e excluir as transações.")
 
     edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True)
@@ -255,10 +215,33 @@ def historico(df):
 
 def main():
     st.set_page_config(page_title="FinanceBoard", layout="wide")
+
+    with st.sidebar:
+        st.markdown("<h2 style='text-align: left; font-size: 26px;'>📊 FinanceBoard</h2>", unsafe_allow_html=True)
+        st.markdown("<hr style='margin: 0 0 15px 0;'>", unsafe_allow_html=True)
+
+        st.markdown("""
+            <style>
+                .stRadio > div {
+                    gap: 12px;
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .stRadio label {
+                    font-size: 20px;
+                    font-weight: bold;
+                    text-align: left;
+                }
+                .stRadio input[type="radio"] {
+                    display: none;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
+        menu = st.radio("Navegação", ["Dashboard", "Histórico"], key="menu", label_visibility="collapsed")
+
     df = load_data()
     df = format_data(df)
-
-    menu = st.sidebar.radio("Navegação", ["Dashboard", "Histórico"])
 
     if menu == "Dashboard":
         df = dashboard(df)
