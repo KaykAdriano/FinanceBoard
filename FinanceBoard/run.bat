@@ -1,5 +1,8 @@
 @echo off
-echo Iniciando o FinanceBoard...
-streamlit run main.py
+cd /d "C:\Users\Kayk Adriano\Documents\FinanceBoard\FinanceBoard"
+REM Se usar ambiente virtual, ative-o abaixo:
+REM call venv\Scripts\activate
+
+python main.py
+
 pause
-s
