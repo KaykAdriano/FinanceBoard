@@ -20,6 +20,7 @@ Assista à apresentação do projeto no YouTube:
 - Resumo geral com saldo total, receitas e despesas
 ![image](https://github.com/user-attachments/assets/604bfcb1-b24a-4249-a6a2-ef1deb5ad55b)
 - Interface gráfica com Tkinter
+  
 ![image](https://github.com/user-attachments/assets/8e39e071-2556-42be-b866-f92222d9088e)
 
 ## 🚀 Como executar
