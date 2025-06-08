@@ -1,45 +1,27 @@
-# 🧾 **FinanceBoard**
+# FinanceBoard
 
-**FinanceBoard** é um aplicativo simples para controle financeiro pessoal, permitindo adicionar receitas e despesas, visualizar um resumo financeiro e acompanhar a evolução dos seus gastos.
+Sistema de Controle Financeiro Pessoal desenvolvido como trabalho prático da disciplina **Programação de Computadores**, ministrada pelo professor **Jeofton Costa Melo**.
 
----
+## 🎥 Apresentação em vídeo
 
-## 📂 Estrutura do Projeto
+Assista à apresentação do projeto no YouTube:  
+📺 https://www.youtube.com/watch?v=AP831nuxe5s
 
-O código principal está no arquivo:  
-`main.py`
+## 👨‍💻 Integrantes
 
----
+- Kayk Adriano Costa Oliveira — RA: 35439866  
+- Nauan Giovanni Souza Lima — RA: 36033740
 
-## 🚀 Como Executar
+## 🖥️ Funcionalidades
 
-### ⚙️ Pré-requisitos
+- Tela de login
+- Cadastro de receitas e despesas
+- Resumo geral com saldo total, receitas e despesas
+- Interface gráfica com Tkinter
 
-- Python 3 instalado no sistema
-- (Opcional) Ambiente virtual configurado para isolar as dependências
+## 🚀 Como executar
 
-### 📋 Passos para executar
+1. Instale o Python (recomendado: versão 3.10 ou superior).
+2. Abra o terminal ou prompt de comando na pasta do projeto.
+3. Execute o arquivo `main.py` com o seguinte comando:
 
-1. Clone ou copie o projeto para seu computador.
-2. Abra o terminal (Prompt de Comando).
-3. Navegue até a pasta do projeto, por exemplo:
-   ```bash
-   cd "C:\\Users\\Kayk Adriano\\Documents\\FinanceBoard\\FinanceBoard"
-
-
-🔐 Tela de Login
-Permite que o usuário faça login para acessar seu painel financeiro.
-
-📊 Tela Principal / Dashboard
-Formulário para adicionar novas transações (receitas ou despesas).
-
-Exibição do saldo atual e resumo financeiro.
-
-Gráfico simples de evolução financeira ao lado do formulário.
-
-📜 Tela de Histórico
-Lista detalhada das transações realizadas.
-
-Campo de busca para filtrar transações por descrição.
-
-Possibilidade de editar e excluir registros.
